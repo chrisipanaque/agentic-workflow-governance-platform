@@ -88,9 +88,9 @@ namespace LLM
             return out;
         }
 
-        // Build a minimal JSON payload. We keep it simple and escape values safely.
+        // Build a chat completions JSON payload. Convert prompt to messages format.
         std::ostringstream payload;
-        payload << "{\"model\":\"" << json_escape(req.model) << "\",\"prompt\":\"" << json_escape(req.prompt) << "\",\"max_tokens\":" << req.max_tokens << ",\"temperature\":" << req.temperature;
+        payload << "{\"model\":\"" << json_escape(req.model) << "\",\"messages\":[{\"role\":\"user\",\"content\":\"" << json_escape(req.prompt) << "\"}],\"max_tokens\":" << req.max_tokens << ",\"temperature\":" << req.temperature;
         if (api_provider)
         {
             payload << ",\"provider\":\"" << json_escape(api_provider) << "\"";
@@ -125,8 +125,72 @@ namespace LLM
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
             out.status_code = static_cast<int>(code);
             out.raw = response_data;
-            // For simplicity, set text to the raw body. Caller should treat as markdown.
-            out.text = response_data;
+            
+            // Extract content from chat completions response format.
+            // Response format: {"choices":[{"message":{"content":"..."}}]}
+            std::string content_key = "\"content\":\"";
+            size_t pos = response_data.find(content_key);
+            if (pos != std::string::npos)
+            {
+                size_t start = pos + content_key.length();
+                size_t end = response_data.find("\"", start);
+                if (end != std::string::npos)
+                {
+                    out.text = response_data.substr(start, end - start);
+                    // Unescape JSON escape sequences in the content
+                    std::string unescaped;
+                    for (size_t i = 0; i < out.text.length(); ++i)
+                    {
+                        if (out.text[i] == '\\' && i + 1 < out.text.length())
+                        {
+                            char next = out.text[i + 1];
+                            if (next == 'n')
+                            {
+                                unescaped += '\n';
+                                ++i;
+                            }
+                            else if (next == 't')
+                            {
+                                unescaped += '\t';
+                                ++i;
+                            }
+                            else if (next == 'r')
+                            {
+                                unescaped += '\r';
+                                ++i;
+                            }
+                            else if (next == '\\')
+                            {
+                                unescaped += '\\';
+                                ++i;
+                            }
+                            else if (next == '"')
+                            {
+                                unescaped += '"';
+                                ++i;
+                            }
+                            else
+                            {
+                                unescaped += out.text[i];
+                            }
+                        }
+                        else
+                        {
+                            unescaped += out.text[i];
+                        }
+                    }
+                    out.text = unescaped;
+                }
+                else
+                {
+                    out.text = response_data;
+                }
+            }
+            else
+            {
+                // Fallback to raw response if format is unexpected
+                out.text = response_data;
+            }
         }
 
         curl_slist_free_all(headers);

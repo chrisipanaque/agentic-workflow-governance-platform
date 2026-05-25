@@ -8,7 +8,7 @@
 namespace LLM {
     struct Request {
         std::string prompt;
-        std::string model = "azureml";
+        std::string model = "openai/gpt-4o-mini";
         int max_tokens = 512;
         double temperature = 0.0;
     };
