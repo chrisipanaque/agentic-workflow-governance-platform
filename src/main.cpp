@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     if (command == "healthcheck") {
         try {
-            std::cout << "AI control plane operational\n";
+            std::cout << "AI control plane operational oh yeah\n";
             json hc_details = github_metadata.to_json();
             hc_details["status"] = "operational";
             audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::SUCCESS, 
