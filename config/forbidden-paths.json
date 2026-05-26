@@ -1,0 +1,16 @@
+{
+  "forbidden_paths": [
+    {
+      "path": "/etc/shadow",
+      "reason": "System security file - unauthorized access"
+    },
+    {
+      "path": "/root/.ssh",
+      "reason": "Sensitive SSH keys - restricted"
+    },
+    {
+      "path": "/var/log/secure",
+      "reason": "System security logs - restricted access"
+    }
+  ]
+}

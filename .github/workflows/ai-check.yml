@@ -22,3 +22,6 @@ jobs:
 
       - name: Test healthcheck
         run: ./build/ai-control-plane healthcheck
+
+      - name: Test show-policies
+        run: ./build/ai-control-plane show-policies
