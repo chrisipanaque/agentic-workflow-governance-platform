@@ -6,7 +6,7 @@ Deterministic C++20 CLI that intercepts AI agent code changes at the repository 
 
 ## Agent System Architecture
 
-The control plane implements a **synchronous multi-stage pipeline** that transforms a raw git diff into a governance decision. Every stage produces a deterministic output consumed by the next:
+The governance platform implements a **synchronous multi-stage pipeline** that transforms a raw git diff into a governance decision. Every stage produces a deterministic output consumed by the next:
 
 ```
                         CONFIGURATION LAYER
@@ -74,7 +74,7 @@ The control plane implements a **synchronous multi-stage pipeline** that transfo
 
 ### Exit Code Protocol
 
-Every command returns 0 or 1, forming the sole communication channel from the control plane back to the agent or CI runner:
+Every command returns 0 or 1, forming the sole communication channel from the governance platform back to the agent or CI runner:
 
 | Command | Exit 0 | Exit 1 |
 |---|---|---|
@@ -95,7 +95,7 @@ Exit 0 signals "safe to proceed automatically." Exit 1 signals "requires human i
 
 ### Stage 1: Diff Scanning
 
-When an AI agent (Claude Code, Copilot, etc.) makes changes to the repository, the control plane captures exactly what changed by running `git --no-pager diff --unified=0` via `popen()`. This captures both staged and unstaged changes.
+When an AI agent (Claude Code, Copilot, etc.) makes changes to the repository, the governance platform captures exactly what changed by running `git --no-pager diff --unified=0` via `popen()`. This captures both staged and unstaged changes.
 
 **Output**: `DiffStats` — a structured list of every changed file with per-file addition/deletion counts and aggregate totals.
 
@@ -178,7 +178,7 @@ Five JSON config files and one CODEOWNERS file govern all system behavior. No re
 
 ### Exit Code as Decision Signal
 
-The control plane follows Unix convention: 0 = success, non-zero = action required. CI pipelines and agent scripts use simple `if`/`else` on exit codes:
+The governance platform follows Unix convention: 0 = success, non-zero = action required. CI pipelines and agent scripts use simple `if`/`else` on exit codes:
 
 ```sh
 ./build/ai-governance-platform check-approval

@@ -1,0 +1,19 @@
+[
+  {
+    "action": "VALIDATE_ARCHITECTURE",
+    "details": {
+      "actor": "",
+      "branch": "",
+      "commit_sha": "",
+      "dependency_violations": [],
+      "event_name": "",
+      "is_pull_request": false,
+      "pr_number": "",
+      "repository": "",
+      "touched_boundaries": []
+    },
+    "message": "Architecture validation passed",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T06:38:46.546"
+  }
+]

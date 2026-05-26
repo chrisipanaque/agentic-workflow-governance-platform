@@ -1,0 +1,65 @@
+name: ai-governance-platform CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test healthcheck
+        run: ./build/ai-governance-platform healthcheck
+
+      - name: Test show-policies
+        run: timeout 30 ./build/ai-governance-platform show-policies
+
+      - name: Test scan-diff
+        run: |
+          cd build
+          git init
+          git config user.email "chris.ipanaque@gmail.com"
+          git config user.name "chrisipanaque"
+          echo "initial content" > test.txt
+          git add test.txt
+          git commit -m "initial"
+          echo "modified content" > test.txt
+          echo "new file" > newfile.txt
+          ../build/ai-governance-platform scan-diff
+          cd ..
+
+      - name: Test validate-policy (pass case)
+        run: ./build/ai-governance-platform validate-policy
+
+      - name: Test validate-policy (fail case - should detect violations)
+        run: ./build/ai-governance-platform validate-policy
+
+      - name: Test risk-score
+        run: ./build/ai-governance-platform risk-score
+
+      - name: Test check-approval
+        run: timeout 30 ./build/ai-governance-platform check-approval
+
+      - name: Test validate-architecture
+        run: timeout 30 ./build/ai-governance-platform validate-architecture
+
+      - name: Upload logs and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-logs-and-traces
+          path: |
+            output/traces/
+            output/reports/
