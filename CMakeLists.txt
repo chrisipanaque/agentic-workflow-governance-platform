@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(ai-control-plane LANGUAGES CXX)
+project(ai-governance-platform LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,7 +13,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
-add_executable(ai-control-plane 
+add_executable(ai-governance-platform 
     src/main.cpp
     src/config_loader.cpp
     src/diff_scanner.cpp
@@ -27,5 +27,5 @@ add_executable(ai-control-plane
     src/ownership_validator.cpp
 )
 
-target_include_directories(ai-control-plane PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(ai-control-plane PRIVATE nlohmann_json::nlohmann_json)
+target_include_directories(ai-governance-platform PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(ai-governance-platform PRIVATE nlohmann_json::nlohmann_json)
