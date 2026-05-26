@@ -25,3 +25,32 @@ jobs:
 
       - name: Test show-policies
         run: ./build/ai-control-plane show-policies
+
+      - name: Test scan-diff
+        run: |
+          cd build
+          git init
+          git config user.email "chris.ipanaque@gmail.com"
+          git config user.name "chrisipanaque"
+          echo "initial content" > test.txt
+          git add test.txt
+          git commit -m "initial"
+          echo "modified content" > test.txt
+          echo "new file" > newfile.txt
+          ../build/ai-control-plane scan-diff
+          cd ..
+
+      - name: Test validate-policy (pass case)
+        run: ./build/ai-control-plane validate-policy
+
+      - name: Test validate-policy (fail case - should detect violations)
+        run: |
+          cd build
+          # Create a file matching forbidden pattern
+          mkdir -p root/.ssh
+          touch root/.ssh/id_rsa
+          git add root/.ssh/id_rsa
+          git commit -m "add ssh key"
+          cd ..
+          # This should fail validation and exit with code 1
+          ! ./build/ai-control-plane validate-policy
