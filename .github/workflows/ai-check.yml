@@ -49,6 +49,9 @@ jobs:
       - name: Test risk-score
         run: ./build/ai-control-plane risk-score
 
+      - name: Test check-approval
+        run: timeout 30 ./build/ai-control-plane check-approval
+
       - name: Upload logs and reports
         if: always()
         uses: actions/upload-artifact@v4

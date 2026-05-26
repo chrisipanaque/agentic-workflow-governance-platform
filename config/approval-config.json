@@ -1,0 +1,8 @@
+{
+  "thresholds": {
+    "auto_approve": 10.0,
+    "require_review": 25.0,
+    "block": 75.0
+  },
+  "approvers_required": 1
+}

@@ -1,0 +1,25 @@
+[
+  {
+    "action": "CHECK_APPROVAL",
+    "details": {
+      "actor": "",
+      "approval_status": "AUTO_APPROVED",
+      "branch": "",
+      "changed_files": 6,
+      "commit_sha": "",
+      "event_name": "",
+      "is_pull_request": false,
+      "pr_number": "",
+      "repository": "",
+      "required_approvers": [
+        "@devops-team",
+        "@default-maintainer",
+        "@team-cpp"
+      ],
+      "score": 2.0
+    },
+    "message": "PROCEED: Standard review sufficient.",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T04:54:09.165"
+  }
+]

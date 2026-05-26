@@ -22,6 +22,7 @@ add_executable(ai-control-plane
     src/trace_logger.cpp
     src/audit_log.cpp
     src/github_metadata.cpp
+    src/approval_gate.cpp
 )
 
 target_include_directories(ai-control-plane PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

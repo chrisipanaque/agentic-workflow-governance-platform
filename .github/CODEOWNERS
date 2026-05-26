@@ -1,0 +1,15 @@
+# Default owners
+* @default-maintainer
+
+# C++ source files
+*.cpp @team-cpp
+*.hpp @team-cpp
+
+# Config files
+config/* @security-team
+
+# CI workflows
+.github/workflows/* @devops-team
+
+# Approval reports
+output/reports/approval_*.md @security-team @default-maintainer

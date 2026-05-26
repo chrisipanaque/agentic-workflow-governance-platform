@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <chrono>
 #include <string_view>
 #include "config_loader.hpp"
 #include "diff_scanner.hpp"
@@ -7,6 +9,7 @@
 #include "trace_logger.hpp"
 #include "audit_log.hpp"
 #include "github_metadata.hpp"
+#include "approval_gate.hpp"
 
 int main(int argc, char* argv[]) {
     std::cerr << "TRACE: main entered" << std::endl;
@@ -212,6 +215,75 @@ int main(int argc, char* argv[]) {
                                   std::string(e.what()));
             audit_log.write_report();
             std::cerr << "TRACE: risk-score returning 1 (exception)" << std::endl;
+            return 1;
+        }
+    }
+
+    if (command == "check-approval") {
+        try {
+            std::cerr << "TRACE: check-approval start" << std::endl;
+            DiffScanner diff_scanner;
+            auto diff_stats = diff_scanner.scan();
+            std::cerr << "TRACE: check-approval diff scanned" << std::endl;
+
+            RiskEngine engine("config/risk-rules.json");
+            engine.load_rules();
+            auto risk = engine.calculate_score(diff_stats);
+            std::cerr << "TRACE: check-approval risk calculated, score=" << risk.score << std::endl;
+
+            ApprovalGate gate("config/approval-config.json");
+            gate.load_config();
+            gate.load_codeowners(".github/CODEOWNERS");
+            std::cerr << "TRACE: check-approval config loaded" << std::endl;
+
+            auto decision = gate.evaluate(risk, diff_stats);
+            gate.print_decision(decision);
+            std::cerr << "TRACE: check-approval evaluated" << std::endl;
+
+            auto md_report = gate.generate_markdown_report(decision, pr_meta, risk);
+            std::cerr << "TRACE: check-approval markdown generated" << std::endl;
+
+            std::filesystem::create_directories("output/reports");
+            auto now = std::chrono::system_clock::now();
+            auto time_t_now = std::chrono::system_clock::to_time_t(now);
+            char filename[64];
+            std::strftime(filename, sizeof(filename), "approval_%Y%m%d_%H%M%S.md",
+                          std::localtime(&time_t_now));
+            std::string filepath = std::string("output/reports/") + filename;
+            std::ofstream md_file(filepath);
+            if (md_file.is_open()) {
+                md_file << md_report;
+                md_file.close();
+                std::cerr << "TRACE: check-approval report written to " << filepath << std::endl;
+            }
+
+            json details;
+            details["score"] = risk.score;
+            details["approval_status"] = decision.status == ApprovalGate::Status::AUTO_APPROVED ? "AUTO_APPROVED" :
+                                          decision.status == ApprovalGate::Status::REQUIRES_REVIEW ? "REQUIRES_REVIEW" : "BLOCKED";
+            details["required_approvers"] = decision.required_approvers;
+            details["changed_files"] = diff_stats.files.size();
+            auto meta_json = github_metadata.to_json();
+            for (const auto& meta : meta_json.items()) {
+                details[meta.key()] = meta.value();
+            }
+            trace_logger.log_trace("check_approval", details);
+
+            AuditLog::Status log_status = (decision.status == ApprovalGate::Status::AUTO_APPROVED)
+                                          ? AuditLog::Status::SUCCESS : AuditLog::Status::FAILURE;
+            audit_log.record_entry(AuditLog::Action::CHECK_APPROVAL, log_status,
+                                  decision.recommendation, details);
+            audit_log.write_report();
+            trace_logger.flush();
+
+            std::cerr << "TRACE: check-approval returning " << ((decision.status == ApprovalGate::Status::AUTO_APPROVED) ? 0 : 1) << std::endl;
+            return (decision.status == ApprovalGate::Status::AUTO_APPROVED) ? 0 : 1;
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::CHECK_APPROVAL, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
+            std::cerr << "TRACE: check-approval returning 1 (exception)" << std::endl;
             return 1;
         }
     }
