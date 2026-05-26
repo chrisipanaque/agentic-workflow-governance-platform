@@ -1,7 +1,7 @@
 #include "audit_log.hpp"
 #include <fstream>
 #include <chrono>
-#include <sys/stat.h>
+#include <filesystem>
 #include <iomanip>
 #include <sstream>
 #include <iostream>
@@ -12,7 +12,7 @@ AuditLog::AuditLog(const std::string& output_dir)
 }
 
 void AuditLog::ensure_directory_exists(const std::string& dir) {
-    ::mkdir(dir.c_str(), 0755);
+    std::filesystem::create_directories(dir);
 }
 
 std::string AuditLog::get_timestamp() const {

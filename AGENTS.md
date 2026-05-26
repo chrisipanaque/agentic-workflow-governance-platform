@@ -32,7 +32,7 @@ All commands write JSON audit reports to `output/reports/audit_*.json` and JSONL
 - `src/path_validator.cpp` — glob matching (`*`/`?`) against forbidden paths
 - `src/risk_engine.cpp` — weight-based scoring, capped at 100; thresholds: ≥75 CRITICAL, ≥50 HIGH, ≥25 MEDIUM
 - `src/github_metadata.cpp` — reads `GITHUB_*` env vars (empty when run locally)
-- `src/trace_logger.cpp` / `src/audit_log.cpp` — creates dirs via POSIX `::mkdir()` (NOT `system("mkdir -p")`), flushes on every command
+- `src/trace_logger.cpp` / `src/audit_log.cpp` — creates dirs via `std::filesystem::create_directories()` (recursive, no shell dependency), flushes on every command
 
 ## Testing
 
