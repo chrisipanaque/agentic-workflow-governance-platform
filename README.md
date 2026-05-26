@@ -48,7 +48,7 @@ The control plane implements a **synchronous multi-stage pipeline** that transfo
   └──────┬───────┘
          │
          ▼
-  ┌─────────────────────┐
+  ┌──────────────────────┐
   │  Observability       │
   │                      │
   │  audit_*.json        │
