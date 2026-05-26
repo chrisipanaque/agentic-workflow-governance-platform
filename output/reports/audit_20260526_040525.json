@@ -1,0 +1,18 @@
+[
+  {
+    "action": "HEALTHCHECK",
+    "details": {
+      "actor": "",
+      "branch": "",
+      "commit_sha": "",
+      "event_name": "",
+      "is_pull_request": false,
+      "pr_number": "",
+      "repository": "",
+      "status": "operational"
+    },
+    "message": "Healthcheck passed",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T04:05:25.673"
+  }
+]

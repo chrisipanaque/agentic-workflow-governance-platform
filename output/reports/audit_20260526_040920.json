@@ -1,0 +1,14 @@
+[
+  {
+    "action": "RISK_SCORE",
+    "details": {
+      "recommendation": "PROCEED: Standard review sufficient.",
+      "risk_factors": [],
+      "score": 0.0,
+      "severity": "LOW"
+    },
+    "message": "Risk score: 0",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T04:09:20.704"
+  }
+]

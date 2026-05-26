@@ -1,0 +1,3 @@
+{"data":{"files_changed":5,"total_additions":13,"total_deletions":13},"event_type":"scan_diff","timestamp":"2026-05-26T04:09:20.651"}
+{"data":{"valid":true,"violations":0},"event_type":"validate_policy","timestamp":"2026-05-26T04:09:20.676"}
+{"data":{"recommendation":"PROCEED: Standard review sufficient.","risk_factors":[],"score":0.0,"severity":"LOW"},"event_type":"risk_score","timestamp":"2026-05-26T04:09:20.703"}

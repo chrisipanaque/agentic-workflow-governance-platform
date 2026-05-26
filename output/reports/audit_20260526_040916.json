@@ -1,0 +1,11 @@
+[
+  {
+    "action": "SHOW_POLICIES",
+    "details": {
+      "policy_count": 3
+    },
+    "message": "Loaded 3 policies",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T04:09:16.519"
+  }
+]

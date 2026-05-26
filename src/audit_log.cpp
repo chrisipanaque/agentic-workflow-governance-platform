@@ -1,7 +1,7 @@
 #include "audit_log.hpp"
 #include <fstream>
 #include <chrono>
-#include <cstdlib>
+#include <filesystem>
 #include <iomanip>
 #include <sstream>
 #include <iostream>
@@ -12,11 +12,7 @@ AuditLog::AuditLog(const std::string& output_dir)
 }
 
 void AuditLog::ensure_directory_exists(const std::string& dir) {
-    std::string cmd = "mkdir -p " + dir;
-    int result = system(cmd.c_str());
-    if (result != 0) {
-        throw std::runtime_error("Failed to create directory: " + dir);
-    }
+    std::filesystem::create_directories(dir);
 }
 
 std::string AuditLog::get_timestamp() const {

@@ -24,7 +24,7 @@ DiffScanner::FileDiff DiffScanner::parse_file_diff(const std::string& hunk_heade
 
 DiffScanner::DiffStats DiffScanner::scan() {
     DiffStats stats;
-    FILE* pipe = popen("git diff --unified=0", "r");
+    FILE* pipe = popen("git --no-pager diff --unified=0", "r");
     if (!pipe) {
         throw std::runtime_error("Failed to run git diff");
     }

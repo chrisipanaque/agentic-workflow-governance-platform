@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
     if (command == "healthcheck") {
         try {
             std::cout << "AI control plane operational oh yeah\n";
+            std::cout.flush();
             json hc_details = github_metadata.to_json();
             hc_details["status"] = "operational";
             audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::SUCCESS, 
@@ -46,6 +47,7 @@ int main(int argc, char* argv[]) {
 
             const auto& paths = loader.get_forbidden_paths();
             std::cout << "Forbidden paths: " << paths.size() << '\n';
+            std::cout.flush();
             for (const auto& policy : paths) {
                 std::cout << "  - " << policy.path << " (" << policy.reason << ")\n";
             }
@@ -75,6 +77,7 @@ int main(int argc, char* argv[]) {
             DiffScanner scanner;
             auto stats = scanner.scan();
             scanner.print_stats(stats);
+            std::cout.flush();
             
             json details;
             details["files_changed"] = stats.files.size();
@@ -110,6 +113,7 @@ int main(int argc, char* argv[]) {
             PathValidator validator(policies);
             auto validation = validator.validate_diff(diff_stats);
             validator.print_validation_result(validation);
+            std::cout.flush();
             
             json details;
             details["valid"] = validation.is_valid;
@@ -144,6 +148,7 @@ int main(int argc, char* argv[]) {
             engine.load_rules();
             auto risk = engine.calculate_score(diff_stats);
             engine.print_score(risk);
+            std::cout.flush();
             
             json details;
             details["score"] = risk.score;
