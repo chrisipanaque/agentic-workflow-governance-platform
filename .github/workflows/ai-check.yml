@@ -24,7 +24,7 @@ jobs:
         run: ./build/ai-control-plane healthcheck
 
       - name: Test show-policies
-        run: ./build/ai-control-plane show-policies
+        run: timeout 30 ./build/ai-control-plane show-policies
 
       - name: Test scan-diff
         run: |

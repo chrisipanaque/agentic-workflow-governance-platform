@@ -1,0 +1,16 @@
+[
+  {
+    "action": "RISK_SCORE",
+    "details": {
+      "recommendation": "PROCEED: Standard review sufficient.",
+      "risk_factors": [
+        "Large diff: 4 files, 47 additions, 13 deletions (+2 points)"
+      ],
+      "score": 2.0,
+      "severity": "LOW"
+    },
+    "message": "Risk score: 2",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T04:30:04.061"
+  }
+]

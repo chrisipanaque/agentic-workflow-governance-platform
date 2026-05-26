@@ -1,7 +1,7 @@
 #include "trace_logger.hpp"
 #include <fstream>
 #include <chrono>
-#include <filesystem>
+#include <sys/stat.h>
 #include <sstream>
 #include <iostream>
 
@@ -11,7 +11,7 @@ TraceLogger::TraceLogger(const std::string& output_dir)
 }
 
 void TraceLogger::ensure_directory_exists(const std::string& dir) {
-    std::filesystem::create_directories(dir);
+    ::mkdir(dir.c_str(), 0755);
 }
 
 void TraceLogger::log_trace(const std::string& event_type, const json& data) {

@@ -9,27 +9,36 @@
 #include "github_metadata.hpp"
 
 int main(int argc, char* argv[]) {
+    std::cerr << "TRACE: main entered" << std::endl;
     if (argc < 2) {
         std::cerr << "Usage: ai-control-plane <command>\n";
         return 1;
     }
 
     std::string_view command{argv[1]};
+    std::cerr << "TRACE: command=" << command << std::endl;
     GitHubMetadata github_metadata;
+    std::cerr << "TRACE: GitHubMetadata constructed" << std::endl;
     TraceLogger trace_logger;
+    std::cerr << "TRACE: TraceLogger constructed" << std::endl;
     AuditLog audit_log;
+    std::cerr << "TRACE: AuditLog constructed" << std::endl;
     auto pr_meta = github_metadata.get_pr_metadata();
+    std::cerr << "TRACE: PR metadata obtained" << std::endl;
 
     if (command == "healthcheck") {
         try {
-            std::cout << "AI control plane operational oh yeah\n";
-            std::cout.flush();
+            std::cerr << "TRACE: healthcheck start" << std::endl;
+            std::cerr << "AI control plane operational oh yeah\n";
             json hc_details = github_metadata.to_json();
             hc_details["status"] = "operational";
             audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::SUCCESS, 
                                   "Healthcheck passed", hc_details);
+            std::cerr << "TRACE: healthcheck audit recorded" << std::endl;
             audit_log.write_report();
+            std::cerr << "TRACE: healthcheck report written" << std::endl;
             trace_logger.flush();
+            std::cerr << "TRACE: healthcheck flush done" << std::endl;
             return 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
@@ -42,42 +51,56 @@ int main(int argc, char* argv[]) {
 
     if (command == "show-policies") {
         try {
+            std::cerr << "TRACE: show-policies start" << std::endl;
             ConfigLoader loader("config/forbidden-paths.json");
             loader.load();
+            std::cerr << "TRACE: config loaded" << std::endl;
 
             const auto& paths = loader.get_forbidden_paths();
-            std::cout << "Forbidden paths: " << paths.size() << '\n';
-            std::cout.flush();
+            std::cerr << "Forbidden paths: " << paths.size() << '\n';
+            std::cerr << "TRACE: about to iterate paths" << std::endl;
             for (const auto& policy : paths) {
-                std::cout << "  - " << policy.path << " (" << policy.reason << ")\n";
+                std::cerr << "  - " << policy.path << " (" << policy.reason << ")\n";
             }
+            std::cerr << "TRACE: path iteration done" << std::endl;
             
             json details;
             details["policy_count"] = paths.size();
+            std::cerr << "TRACE: building json details" << std::endl;
                         for (const auto& meta : github_metadata.to_json().items()) {
                             details[meta.key()] = meta.value();
                         }
+            std::cerr << "TRACE: json details built" << std::endl;
             trace_logger.log_trace("show_policies", details);
+            std::cerr << "TRACE: trace logged" << std::endl;
             audit_log.record_entry(AuditLog::Action::SHOW_POLICIES, AuditLog::Status::SUCCESS,
                                   "Loaded " + std::to_string(paths.size()) + " policies", details);
+            std::cerr << "TRACE: audit recorded" << std::endl;
             audit_log.write_report();
+            std::cerr << "TRACE: report written" << std::endl;
             trace_logger.flush();
+            std::cerr << "TRACE: flush done" << std::endl;
+
+            std::cerr << "TRACE: show-policies returning 0" << std::endl;
             return 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
             audit_log.record_entry(AuditLog::Action::SHOW_POLICIES, AuditLog::Status::FAILURE,
                                   std::string(e.what()));
             audit_log.write_report();
+            std::cerr << "TRACE: show-policies returning 1 (exception)" << std::endl;
             return 1;
         }
     }
 
     if (command == "scan-diff") {
         try {
+            std::cerr << "TRACE: scan-diff start" << std::endl;
             DiffScanner scanner;
             auto stats = scanner.scan();
+            std::cerr << "TRACE: scan-diff scan complete" << std::endl;
             scanner.print_stats(stats);
-            std::cout.flush();
+            std::cerr << "TRACE: scan-diff stats printed" << std::endl;
             
             json details;
             details["files_changed"] = stats.files.size();
@@ -91,29 +114,34 @@ int main(int argc, char* argv[]) {
                                   "Scanned " + std::to_string(stats.files.size()) + " changed files", details);
             audit_log.write_report();
             trace_logger.flush();
+            std::cerr << "TRACE: scan-diff returning 0" << std::endl;
             return 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
             audit_log.record_entry(AuditLog::Action::SCAN_DIFF, AuditLog::Status::FAILURE,
                                   std::string(e.what()));
             audit_log.write_report();
+            std::cerr << "TRACE: scan-diff returning 1 (exception)" << std::endl;
             return 1;
         }
     }
 
     if (command == "validate-policy") {
         try {
+            std::cerr << "TRACE: validate-policy start" << std::endl;
             ConfigLoader config_loader("config/forbidden-paths.json");
             config_loader.load();
             const auto& policies = config_loader.get_forbidden_paths();
+            std::cerr << "TRACE: validate-policy config loaded" << std::endl;
 
             DiffScanner diff_scanner;
             auto diff_stats = diff_scanner.scan();
+            std::cerr << "TRACE: validate-policy diff scanned" << std::endl;
 
             PathValidator validator(policies);
             auto validation = validator.validate_diff(diff_stats);
             validator.print_validation_result(validation);
-            std::cout.flush();
+            std::cerr << "TRACE: validate-policy validation done" << std::endl;
             
             json details;
             details["valid"] = validation.is_valid;
@@ -129,26 +157,30 @@ int main(int argc, char* argv[]) {
             audit_log.write_report();
             trace_logger.flush();
 
+            std::cerr << "TRACE: validate-policy returning " << (validation.is_valid ? 0 : 1) << std::endl;
             return validation.is_valid ? 0 : 1;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
             audit_log.record_entry(AuditLog::Action::VALIDATE_POLICY, AuditLog::Status::FAILURE,
                                   std::string(e.what()));
             audit_log.write_report();
+            std::cerr << "TRACE: validate-policy returning 1 (exception)" << std::endl;
             return 1;
         }
     }
 
     if (command == "risk-score") {
         try {
+            std::cerr << "TRACE: risk-score start" << std::endl;
             DiffScanner diff_scanner;
             auto diff_stats = diff_scanner.scan();
+            std::cerr << "TRACE: risk-score diff scanned" << std::endl;
 
             RiskEngine engine("config/risk-rules.json");
             engine.load_rules();
             auto risk = engine.calculate_score(diff_stats);
             engine.print_score(risk);
-            std::cout.flush();
+            std::cerr << "TRACE: risk-score calculated" << std::endl;
             
             json details;
             details["score"] = risk.score;
@@ -168,12 +200,14 @@ int main(int argc, char* argv[]) {
             audit_log.write_report();
             trace_logger.flush();
 
+            std::cerr << "TRACE: risk-score returning " << ((risk.score >= 75.0) ? 1 : 0) << std::endl;
             return (risk.score >= 75.0) ? 1 : 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
             audit_log.record_entry(AuditLog::Action::RISK_SCORE, AuditLog::Status::FAILURE,
                                   std::string(e.what()));
             audit_log.write_report();
+            std::cerr << "TRACE: risk-score returning 1 (exception)" << std::endl;
             return 1;
         }
     }
