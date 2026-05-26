@@ -6,6 +6,7 @@
 #include "risk_engine.hpp"
 #include "trace_logger.hpp"
 #include "audit_log.hpp"
+#include "github_metadata.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -14,14 +15,18 @@ int main(int argc, char* argv[]) {
     }
 
     std::string_view command{argv[1]};
+    GitHubMetadata github_metadata;
     TraceLogger trace_logger;
     AuditLog audit_log;
+    auto pr_meta = github_metadata.get_pr_metadata();
 
     if (command == "healthcheck") {
         try {
             std::cout << "AI control plane operational\n";
+            json hc_details = github_metadata.to_json();
+            hc_details["status"] = "operational";
             audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::SUCCESS, 
-                                  "Healthcheck passed");
+                                  "Healthcheck passed", hc_details);
             audit_log.write_report();
             trace_logger.flush();
             return 0;
@@ -47,6 +52,9 @@ int main(int argc, char* argv[]) {
             
             json details;
             details["policy_count"] = paths.size();
+                        for (const auto& meta : github_metadata.to_json().items()) {
+                            details[meta.key()] = meta.value();
+                        }
             trace_logger.log_trace("show_policies", details);
             audit_log.record_entry(AuditLog::Action::SHOW_POLICIES, AuditLog::Status::SUCCESS,
                                   "Loaded " + std::to_string(paths.size()) + " policies", details);
@@ -72,6 +80,9 @@ int main(int argc, char* argv[]) {
             details["files_changed"] = stats.files.size();
             details["total_additions"] = stats.total_additions;
             details["total_deletions"] = stats.total_deletions;
+                        for (const auto& meta : github_metadata.to_json().items()) {
+                            details[meta.key()] = meta.value();
+                        }
             trace_logger.log_trace("scan_diff", details);
             audit_log.record_entry(AuditLog::Action::SCAN_DIFF, AuditLog::Status::SUCCESS,
                                   "Scanned " + std::to_string(stats.files.size()) + " changed files", details);
@@ -103,6 +114,9 @@ int main(int argc, char* argv[]) {
             json details;
             details["valid"] = validation.is_valid;
             details["violations"] = validation.violations.size();
+                        for (const auto& meta : github_metadata.to_json().items()) {
+                            details[meta.key()] = meta.value();
+                        }
             trace_logger.log_trace("validate_policy", details);
             
             AuditLog::Status status = validation.is_valid ? AuditLog::Status::SUCCESS : AuditLog::Status::FAILURE;
@@ -138,6 +152,9 @@ int main(int argc, char* argv[]) {
                                    risk.severity == RiskEngine::Severity::MEDIUM ? "MEDIUM" : "LOW";
             details["recommendation"] = risk.recommendation;
             details["risk_factors"] = risk.risk_factors;
+                        for (const auto& meta : github_metadata.to_json().items()) {
+                            details[meta.key()] = meta.value();
+                        }
             trace_logger.log_trace("risk_score", details);
             
             AuditLog::Status status = (risk.score >= 75.0) ? AuditLog::Status::FAILURE : AuditLog::Status::SUCCESS;
