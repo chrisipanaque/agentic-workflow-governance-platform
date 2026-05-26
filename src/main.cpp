@@ -67,7 +67,8 @@ int main(int argc, char* argv[]) {
             json details;
             details["policy_count"] = paths.size();
             std::cerr << "TRACE: building json details" << std::endl;
-                        for (const auto& meta : github_metadata.to_json().items()) {
+                        auto meta_json = github_metadata.to_json();
+                        for (const auto& meta : meta_json.items()) {
                             details[meta.key()] = meta.value();
                         }
             std::cerr << "TRACE: json details built" << std::endl;
@@ -106,7 +107,8 @@ int main(int argc, char* argv[]) {
             details["files_changed"] = stats.files.size();
             details["total_additions"] = stats.total_additions;
             details["total_deletions"] = stats.total_deletions;
-                        for (const auto& meta : github_metadata.to_json().items()) {
+                        auto meta_json = github_metadata.to_json();
+                        for (const auto& meta : meta_json.items()) {
                             details[meta.key()] = meta.value();
                         }
             trace_logger.log_trace("scan_diff", details);
@@ -146,7 +148,8 @@ int main(int argc, char* argv[]) {
             json details;
             details["valid"] = validation.is_valid;
             details["violations"] = validation.violations.size();
-                        for (const auto& meta : github_metadata.to_json().items()) {
+                        auto meta_json = github_metadata.to_json();
+                        for (const auto& meta : meta_json.items()) {
                             details[meta.key()] = meta.value();
                         }
             trace_logger.log_trace("validate_policy", details);
@@ -189,7 +192,8 @@ int main(int argc, char* argv[]) {
                                    risk.severity == RiskEngine::Severity::MEDIUM ? "MEDIUM" : "LOW";
             details["recommendation"] = risk.recommendation;
             details["risk_factors"] = risk.risk_factors;
-                        for (const auto& meta : github_metadata.to_json().items()) {
+                        auto meta_json = github_metadata.to_json();
+                        for (const auto& meta : meta_json.items()) {
                             details[meta.key()] = meta.value();
                         }
             trace_logger.log_trace("risk_score", details);

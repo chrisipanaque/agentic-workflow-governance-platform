@@ -1,0 +1,21 @@
+[
+  {
+    "action": "RISK_SCORE",
+    "details": {
+      "actor": "",
+      "branch": "",
+      "commit_sha": "",
+      "event_name": "",
+      "is_pull_request": false,
+      "pr_number": "",
+      "recommendation": "PROCEED: Standard review sufficient.",
+      "repository": "",
+      "risk_factors": [],
+      "score": 0.0,
+      "severity": "LOW"
+    },
+    "message": "Risk score: 0",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T04:35:24.622"
+  }
+]

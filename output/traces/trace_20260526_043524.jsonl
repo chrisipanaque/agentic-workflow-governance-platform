@@ -1,0 +1,4 @@
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","is_pull_request":false,"policy_count":3,"pr_number":"","repository":""},"event_type":"show_policies","timestamp":"2026-05-26T04:35:24.530"}
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","files_changed":1,"is_pull_request":false,"pr_number":"","repository":"","total_additions":8,"total_deletions":4},"event_type":"scan_diff","timestamp":"2026-05-26T04:35:24.568"}
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","is_pull_request":false,"pr_number":"","repository":"","valid":true,"violations":0},"event_type":"validate_policy","timestamp":"2026-05-26T04:35:24.595"}
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","is_pull_request":false,"pr_number":"","recommendation":"PROCEED: Standard review sufficient.","repository":"","risk_factors":[],"score":0.0,"severity":"LOW"},"event_type":"risk_score","timestamp":"2026-05-26T04:35:24.621"}

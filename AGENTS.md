@@ -32,7 +32,7 @@ All commands write JSON audit reports to `output/reports/audit_*.json` and JSONL
 - `src/path_validator.cpp` — glob matching (`*`/`?`) against forbidden paths
 - `src/risk_engine.cpp` — weight-based scoring, capped at 100; thresholds: ≥75 CRITICAL, ≥50 HIGH, ≥25 MEDIUM
 - `src/github_metadata.cpp` — reads `GITHUB_*` env vars (empty when run locally)
-- `src/trace_logger.cpp` / `src/audit_log.cpp` — creates dirs via `system("mkdir -p ...")`, flushes on every command
+- `src/trace_logger.cpp` / `src/audit_log.cpp` — creates dirs via POSIX `::mkdir()` (NOT `system("mkdir -p")`), flushes on every command
 
 ## Testing
 
@@ -47,3 +47,10 @@ To test locally, ensure you have staged/unstaged changes in a git repo, then run
 - Exit code 1 also means "unknown command"
 - `risk-score` returns 1 when score ≥ 75 (CRITICAL)
 - `validate-policy` returns 1 when violations found
+
+## Gotchas
+
+- **Never iterate `github_metadata.to_json().items()` directly.** The temporary `json` is destroyed before the loop body, a dangling-pointer UB. Always store in a named variable first: `auto m = github_metadata.to_json(); for (const auto& kv : m.items())`
+- `diff_scanner` uses `git --no-pager diff --unified=0` via `popen()` to prevent pager-triggered blocking
+- All output to stdout uses `std::cout`; diagnostic trace markers use `std::cerr` (unbuffered, visible immediately in CI)
+- CI step for `show-policies` wraps the binary in `timeout 30` as a safety net
