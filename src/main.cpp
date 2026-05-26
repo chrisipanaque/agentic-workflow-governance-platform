@@ -4,6 +4,8 @@
 #include "diff_scanner.hpp"
 #include "path_validator.hpp"
 #include "risk_engine.hpp"
+#include "trace_logger.hpp"
+#include "audit_log.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -12,10 +14,24 @@ int main(int argc, char* argv[]) {
     }
 
     std::string_view command{argv[1]};
+    TraceLogger trace_logger;
+    AuditLog audit_log;
 
     if (command == "healthcheck") {
-        std::cout << "AI control plane operational\n";
-        return 0;
+        try {
+            std::cout << "AI control plane operational\n";
+            audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::SUCCESS, 
+                                  "Healthcheck passed");
+            audit_log.write_report();
+            trace_logger.flush();
+            return 0;
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
+            return 1;
+        }
     }
 
     if (command == "show-policies") {
@@ -28,9 +44,20 @@ int main(int argc, char* argv[]) {
             for (const auto& policy : paths) {
                 std::cout << "  - " << policy.path << " (" << policy.reason << ")\n";
             }
+            
+            json details;
+            details["policy_count"] = paths.size();
+            trace_logger.log_trace("show_policies", details);
+            audit_log.record_entry(AuditLog::Action::SHOW_POLICIES, AuditLog::Status::SUCCESS,
+                                  "Loaded " + std::to_string(paths.size()) + " policies", details);
+            audit_log.write_report();
+            trace_logger.flush();
             return 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::SHOW_POLICIES, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
             return 1;
         }
     }
@@ -40,9 +67,22 @@ int main(int argc, char* argv[]) {
             DiffScanner scanner;
             auto stats = scanner.scan();
             scanner.print_stats(stats);
+            
+            json details;
+            details["files_changed"] = stats.files.size();
+            details["total_additions"] = stats.total_additions;
+            details["total_deletions"] = stats.total_deletions;
+            trace_logger.log_trace("scan_diff", details);
+            audit_log.record_entry(AuditLog::Action::SCAN_DIFF, AuditLog::Status::SUCCESS,
+                                  "Scanned " + std::to_string(stats.files.size()) + " changed files", details);
+            audit_log.write_report();
+            trace_logger.flush();
             return 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::SCAN_DIFF, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
             return 1;
         }
     }
@@ -59,10 +99,24 @@ int main(int argc, char* argv[]) {
             PathValidator validator(policies);
             auto validation = validator.validate_diff(diff_stats);
             validator.print_validation_result(validation);
+            
+            json details;
+            details["valid"] = validation.is_valid;
+            details["violations"] = validation.violations.size();
+            trace_logger.log_trace("validate_policy", details);
+            
+            AuditLog::Status status = validation.is_valid ? AuditLog::Status::SUCCESS : AuditLog::Status::FAILURE;
+            audit_log.record_entry(AuditLog::Action::VALIDATE_POLICY, status,
+                                  validation.is_valid ? "Policy validation passed" : "Policy violations detected", details);
+            audit_log.write_report();
+            trace_logger.flush();
 
             return validation.is_valid ? 0 : 1;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::VALIDATE_POLICY, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
             return 1;
         }
     }
@@ -76,10 +130,28 @@ int main(int argc, char* argv[]) {
             engine.load_rules();
             auto risk = engine.calculate_score(diff_stats);
             engine.print_score(risk);
+            
+            json details;
+            details["score"] = risk.score;
+            details["severity"] = risk.severity == RiskEngine::Severity::CRITICAL ? "CRITICAL" :
+                                   risk.severity == RiskEngine::Severity::HIGH ? "HIGH" :
+                                   risk.severity == RiskEngine::Severity::MEDIUM ? "MEDIUM" : "LOW";
+            details["recommendation"] = risk.recommendation;
+            details["risk_factors"] = risk.risk_factors;
+            trace_logger.log_trace("risk_score", details);
+            
+            AuditLog::Status status = (risk.score >= 75.0) ? AuditLog::Status::FAILURE : AuditLog::Status::SUCCESS;
+            audit_log.record_entry(AuditLog::Action::RISK_SCORE, status,
+                                  "Risk score: " + std::to_string(static_cast<int>(risk.score)), details);
+            audit_log.write_report();
+            trace_logger.flush();
 
             return (risk.score >= 75.0) ? 1 : 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::RISK_SCORE, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
             return 1;
         }
     }

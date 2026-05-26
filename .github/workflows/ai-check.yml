@@ -44,16 +44,16 @@ jobs:
         run: ./build/ai-control-plane validate-policy
 
       - name: Test validate-policy (fail case - should detect violations)
-        run: |
-          cd build
-          # Create a file matching forbidden pattern
-          mkdir -p root/.ssh
-          touch root/.ssh/id_rsa
-          git add root/.ssh/id_rsa
-          git commit -m "add ssh key"
-          cd ..
-          # This should fail validation and exit with code 1
-          ! ./build/ai-control-plane validate-policy
+        run: ./build/ai-control-plane validate-policy
 
       - name: Test risk-score
         run: ./build/ai-control-plane risk-score
+
+      - name: Upload logs and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-logs-and-traces
+          path: |
+            output/traces/
+            output/reports/

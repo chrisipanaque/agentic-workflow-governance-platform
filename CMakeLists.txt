@@ -19,6 +19,8 @@ add_executable(ai-control-plane
     src/diff_scanner.cpp
     src/path_validator.cpp
     src/risk_engine.cpp
+    src/trace_logger.cpp
+    src/audit_log.cpp
 )
 
 target_include_directories(ai-control-plane PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
