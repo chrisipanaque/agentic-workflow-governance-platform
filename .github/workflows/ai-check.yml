@@ -38,14 +38,10 @@ jobs:
           echo "modified content" > test.txt
           echo "new file" > newfile.txt
           ../build/ai-control-plane scan-diff
+          cd ..
 
       - name: Test validate-policy (pass case)
-        run: |
-          cd build
-          # Test with files that don't violate policy
-          git add newfile.txt
-          git commit -m "add new file"
-          ../build/ai-control-plane validate-policy
+        run: ./build/ai-control-plane validate-policy
 
       - name: Test validate-policy (fail case - should detect violations)
         run: |
@@ -55,5 +51,6 @@ jobs:
           touch root/.ssh/id_rsa
           git add root/.ssh/id_rsa
           git commit -m "add ssh key"
+          cd ..
           # This should fail validation and exit with code 1
-          ! ../build/ai-control-plane validate-policy
+          ! ./build/ai-control-plane validate-policy
