@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     if (command == "healthcheck") {
         try {
             std::cerr << "TRACE: healthcheck start" << std::endl;
-            std::cerr << "AI control plane operational oh yeah\n";
+            std::cerr << "AI governance platform operational oh yeah\n";
             json hc_details = github_metadata.to_json();
             hc_details["status"] = "operational";
             audit_log.record_entry(AuditLog::Action::HEALTHCHECK, AuditLog::Status::SUCCESS, 
