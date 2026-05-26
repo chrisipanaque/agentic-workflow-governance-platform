@@ -1,4 +1,4 @@
-# Agentic Governance Platform
+# Agentic Governance Tool / Platform
 
 Deterministic C++20 CLI that intercepts AI agent code changes at the repository boundary, validates them against configurable policies, and returns structured decisions via exit codes — all with full traceability.
 
