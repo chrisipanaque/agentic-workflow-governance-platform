@@ -1,0 +1,22 @@
+{
+  "boundaries": [
+    {
+      "name": "Core → Plugin isolation",
+      "source_pattern": "src/core/**",
+      "forbidden_dependencies": ["src/plugins/", "src/external/"],
+      "reason": "Core module must not depend on plugins or external services"
+    },
+    {
+      "name": "Frontend → Backend isolation",
+      "source_pattern": "src/frontend/**",
+      "forbidden_dependencies": ["src/backend/"],
+      "reason": "Frontend must not directly depend on backend modules"
+    },
+    {
+      "name": "Security isolation",
+      "source_pattern": "src/security/**",
+      "forbidden_dependencies": ["src/frontend/", "src/backend/", "src/plugins/"],
+      "reason": "Security module must maintain strict isolation"
+    }
+  ]
+}

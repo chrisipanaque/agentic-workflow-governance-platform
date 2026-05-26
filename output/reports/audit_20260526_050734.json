@@ -1,0 +1,20 @@
+[
+  {
+    "action": "SCAN_DIFF",
+    "details": {
+      "actor": "",
+      "branch": "",
+      "commit_sha": "",
+      "event_name": "",
+      "files_changed": 6,
+      "is_pull_request": false,
+      "pr_number": "",
+      "repository": "",
+      "total_additions": 76,
+      "total_deletions": 1
+    },
+    "message": "Scanned 6 changed files",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T05:07:34.865"
+  }
+]

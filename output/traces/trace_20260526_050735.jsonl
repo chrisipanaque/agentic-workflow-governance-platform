@@ -1,0 +1,2 @@
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","is_pull_request":false,"pr_number":"","repository":"","valid":true,"violations":0},"event_type":"validate_policy","timestamp":"2026-05-26T05:07:35.396"}
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","is_pull_request":false,"pr_number":"","recommendation":"PROCEED: Standard review sufficient.","repository":"","risk_factors":["Large diff: 6 files, 76 additions, 1 deletions (+2 points)"],"score":2.0,"severity":"LOW"},"event_type":"risk_score","timestamp":"2026-05-26T05:07:35.865"}

@@ -1,0 +1,23 @@
+[
+  {
+    "action": "RISK_SCORE",
+    "details": {
+      "actor": "",
+      "branch": "",
+      "commit_sha": "",
+      "event_name": "",
+      "is_pull_request": false,
+      "pr_number": "",
+      "recommendation": "PROCEED: Standard review sufficient.",
+      "repository": "",
+      "risk_factors": [
+        "Large diff: 6 files, 76 additions, 1 deletions (+2 points)"
+      ],
+      "score": 2.0,
+      "severity": "LOW"
+    },
+    "message": "Risk score: 2",
+    "status": "SUCCESS",
+    "timestamp": "2026-05-26T05:07:35.865"
+  }
+]

@@ -10,6 +10,8 @@
 #include "audit_log.hpp"
 #include "github_metadata.hpp"
 #include "approval_gate.hpp"
+#include "dependency_validator.hpp"
+#include "ownership_validator.hpp"
 
 int main(int argc, char* argv[]) {
     std::cerr << "TRACE: main entered" << std::endl;
@@ -284,6 +286,71 @@ int main(int argc, char* argv[]) {
                                   std::string(e.what()));
             audit_log.write_report();
             std::cerr << "TRACE: check-approval returning 1 (exception)" << std::endl;
+            return 1;
+        }
+    }
+
+    if (command == "validate-architecture") {
+        try {
+            std::cerr << "TRACE: validate-architecture start" << std::endl;
+
+            DiffScanner diff_scanner;
+            auto diff_stats = diff_scanner.scan();
+            std::cerr << "TRACE: validate-architecture diff scanned" << std::endl;
+
+            DependencyValidator dep_validator("config/dependency-rules.json");
+            dep_validator.load_rules();
+            std::cerr << "TRACE: validate-architecture dependency rules loaded" << std::endl;
+
+            OwnershipValidator own_validator("config/ownership-rules.json");
+            own_validator.load_rules();
+            std::cerr << "TRACE: validate-architecture ownership rules loaded" << std::endl;
+
+            auto dep_violations = dep_validator.validate(diff_stats);
+            dep_validator.print_violations(dep_violations);
+
+            auto ownership_info = own_validator.get_file_ownership(diff_stats);
+            own_validator.print_ownership(ownership_info);
+
+            auto touched_boundaries = own_validator.detect_cross_boundary(diff_stats);
+            own_validator.print_cross_boundary(touched_boundaries);
+
+            json details;
+            details["dependency_violations"] = json::array();
+            for (const auto& v : dep_violations) {
+                json v_json;
+                v_json["source_file"] = v.source_file;
+                v_json["boundary"] = v.boundary_name;
+                v_json["forbidden_dependency"] = v.forbidden_dependency;
+                v_json["reason"] = v.reason;
+                details["dependency_violations"].push_back(v_json);
+            }
+            details["touched_boundaries"] = json(touched_boundaries);
+
+            auto meta_json = github_metadata.to_json();
+            for (const auto& meta : meta_json.items()) {
+                details[meta.key()] = meta.value();
+            }
+            trace_logger.log_trace("validate_architecture", details);
+
+            bool has_violations = !dep_violations.empty();
+            AuditLog::Status log_status = has_violations
+                                          ? AuditLog::Status::FAILURE
+                                          : AuditLog::Status::SUCCESS;
+            audit_log.record_entry(AuditLog::Action::VALIDATE_ARCHITECTURE, log_status,
+                                  has_violations ? "Dependency violations found" : "Architecture validation passed",
+                                  details);
+            audit_log.write_report();
+            trace_logger.flush();
+
+            std::cerr << "TRACE: validate-architecture returning " << (has_violations ? 1 : 0) << std::endl;
+            return has_violations ? 1 : 0;
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << '\n';
+            audit_log.record_entry(AuditLog::Action::VALIDATE_ARCHITECTURE, AuditLog::Status::FAILURE,
+                                  std::string(e.what()));
+            audit_log.write_report();
+            std::cerr << "TRACE: validate-architecture returning 1 (exception)" << std::endl;
             return 1;
         }
     }

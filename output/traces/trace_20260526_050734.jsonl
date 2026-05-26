@@ -1,0 +1,2 @@
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","is_pull_request":false,"policy_count":3,"pr_number":"","repository":""},"event_type":"show_policies","timestamp":"2026-05-26T05:07:34.344"}
+{"data":{"actor":"","branch":"","commit_sha":"","event_name":"","files_changed":6,"is_pull_request":false,"pr_number":"","repository":"","total_additions":76,"total_deletions":1},"event_type":"scan_diff","timestamp":"2026-05-26T05:07:34.865"}

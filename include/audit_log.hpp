@@ -14,7 +14,8 @@ public:
         SCAN_DIFF,
         VALIDATE_POLICY,
         RISK_SCORE,
-        CHECK_APPROVAL
+        CHECK_APPROVAL,
+        VALIDATE_ARCHITECTURE
     };
 
     enum class Status {

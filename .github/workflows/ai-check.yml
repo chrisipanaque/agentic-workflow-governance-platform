@@ -52,6 +52,9 @@ jobs:
       - name: Test check-approval
         run: timeout 30 ./build/ai-control-plane check-approval
 
+      - name: Test validate-architecture
+        run: timeout 30 ./build/ai-control-plane validate-architecture
+
       - name: Upload logs and reports
         if: always()
         uses: actions/upload-artifact@v4
