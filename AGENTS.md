@@ -1,4 +1,4 @@
-# ai-control-plane
+# ai-governance-platform
 
 C++20 CLI tool that scans git diffs, validates paths against policies, and computes risk scores for PR review safety gating.
 
@@ -7,7 +7,7 @@ C++20 CLI tool that scans git diffs, validates paths against policies, and compu
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-./build/ai-control-plane <command>
+./build/ai-governance-platform <command>
 ```
 
 Single dependency: `nlohmann_json` (v3.11.2, fetched via CMake FetchContent). No package manager required.

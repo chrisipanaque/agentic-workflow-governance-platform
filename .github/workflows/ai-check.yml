@@ -1,4 +1,4 @@
-name: ai-control-plane CI
+name: ai-governance-platform CI
 
 on:
   push:
@@ -21,10 +21,10 @@ jobs:
         run: cmake --build build
 
       - name: Test healthcheck
-        run: ./build/ai-control-plane healthcheck
+        run: ./build/ai-governance-platform healthcheck
 
       - name: Test show-policies
-        run: timeout 30 ./build/ai-control-plane show-policies
+        run: timeout 30 ./build/ai-governance-platform show-policies
 
       - name: Test scan-diff
         run: |
@@ -37,23 +37,23 @@ jobs:
           git commit -m "initial"
           echo "modified content" > test.txt
           echo "new file" > newfile.txt
-          ../build/ai-control-plane scan-diff
+          ../build/ai-governance-platform scan-diff
           cd ..
 
       - name: Test validate-policy (pass case)
-        run: ./build/ai-control-plane validate-policy
+        run: ./build/ai-governance-platform validate-policy
 
       - name: Test validate-policy (fail case - should detect violations)
-        run: ./build/ai-control-plane validate-policy
+        run: ./build/ai-governance-platform validate-policy
 
       - name: Test risk-score
-        run: ./build/ai-control-plane risk-score
+        run: ./build/ai-governance-platform risk-score
 
       - name: Test check-approval
-        run: timeout 30 ./build/ai-control-plane check-approval
+        run: timeout 30 ./build/ai-governance-platform check-approval
 
       - name: Test validate-architecture
-        run: timeout 30 ./build/ai-control-plane validate-architecture
+        run: timeout 30 ./build/ai-governance-platform validate-architecture
 
       - name: Upload logs and reports
         if: always()

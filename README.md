@@ -1,4 +1,4 @@
-# ai-control-plane — Agentic Governance Platform
+# Agentic Governance Platform
 
 Deterministic C++20 CLI that intercepts AI agent code changes at the repository boundary, validates them against configurable policies, and returns structured decisions via exit codes — all with full traceability.
 
@@ -48,7 +48,7 @@ The control plane implements a **synchronous multi-stage pipeline** that transfo
   └──────┬───────┘
          │
          ▼
-  ┌─────────────────────┐
+  ┌──────────────────────┐
   │  Observability       │
   │                      │
   │  audit_*.json        │
@@ -181,7 +181,7 @@ Five JSON config files and one CODEOWNERS file govern all system behavior. No re
 The control plane follows Unix convention: 0 = success, non-zero = action required. CI pipelines and agent scripts use simple `if`/`else` on exit codes:
 
 ```sh
-./build/ai-control-plane check-approval
+./build/ai-governance-platform check-approval
 if [ $? -eq 0 ]; then
   echo "Auto-approved — safe to merge"
 else
@@ -199,14 +199,14 @@ All policies are JSON files. Agents can modify any config file to adjust enforce
 
 ### Single-Binary Deployment
 
-The compiled binary (`ai-control-plane`) and its config files are the only deployable units. Zero runtime dependencies. This means any agent environment — local dev machine, CI runner, container — can enforce the same policies by receiving the same binary and configs.
+The compiled binary (`ai-governance-platform`) and its config files are the only deployable units. Zero runtime dependencies. This means any agent environment — local dev machine, CI runner, container — can enforce the same policies by receiving the same binary and configs.
 
 ---
 
 ## Quick Reference
 
 ```
-CLI:  ./ai-control-plane <command>
+CLI:  ./ai-governance-platform <command>
 C++:  C++20, CMake 3.20+
 Dep:  nlohmann/json v3.11.2 (FetchContent, no package manager)
 LOC:  1,852 lines across 11 source + 10 header files
