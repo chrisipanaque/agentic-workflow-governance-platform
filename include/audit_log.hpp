@@ -13,7 +13,8 @@ public:
         SHOW_POLICIES,
         SCAN_DIFF,
         VALIDATE_POLICY,
-        RISK_SCORE
+        RISK_SCORE,
+        CHECK_APPROVAL
     };
 
     enum class Status {
