@@ -38,7 +38,7 @@ All commands write JSON audit reports to `output/reports/audit_*.json` and JSONL
 
 ## Testing
 
-No unit test framework. CI (`.github/workflows/ai-check.yml`) runs each command as a smoke test. For `scan-diff`, CI initializes a temp git repo with changes to avoid depending on the repo's actual diff.
+No unit test framework. CI (`.github/workflows/pr-governance-check.yml`) runs each command as a smoke test. For `scan-diff`, CI initializes a temp git repo with changes to avoid depending on the repo's actual diff.
 
 To test locally, ensure you have staged/unstaged changes in a git repo, then run any command.
 
