@@ -4,6 +4,16 @@ Deterministic C++20 CLI that intercepts AI agent code changes at the repository 
 
 All 7 commands run as standalone CLI tools in any git repository — same binary, same exit codes whether you run them locally in your terminal or as a CI gate.
 
+## Requirements
+
+- **Git** — the tool runs `git diff` and installs as a git submodule
+- **CMake 3.20+** — C++20 build system
+  - macOS: `brew install cmake`
+  - Linux (Debian/Ubuntu): `sudo apt-get install cmake build-essential`
+- **C++20 compiler** — GCC 10+, Clang 10+, Apple Clang 14+, or MSVC 2022+
+- **No package manager needed** — the sole dependency (`nlohmann_json` v3.11.2) fetches automatically via CMake FetchContent
+- **Platforms**: Linux (x86_64, aarch64), macOS (arm64, x86_64)
+
 ---
 
 ## Quick Start
