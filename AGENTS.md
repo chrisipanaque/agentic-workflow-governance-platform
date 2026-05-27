@@ -1,4 +1,4 @@
-# ai-governance-platform
+# agentic-workflow-governance-tools
 
 C++20 CLI tool that scans git diffs, validates paths against policies, and computes risk scores for PR review safety gating.
 

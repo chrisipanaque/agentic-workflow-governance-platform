@@ -199,7 +199,7 @@ All policies are JSON files. Agents can modify any config file to adjust enforce
 
 ### Single-Binary Deployment
 
-The compiled binary (`ai-governance-platform`) and its config files are the only deployable units. Zero runtime dependencies. This means any agent environment — local dev machine, CI runner, container — can enforce the same policies by receiving the same binary and configs.
+The compiled binary (`agentic-workflow-governance-tools`) and its config files are the only deployable units. Zero runtime dependencies. This means any agent environment — local dev machine, CI runner, container — can enforce the same policies by receiving the same binary and configs.
 
 ---
 
