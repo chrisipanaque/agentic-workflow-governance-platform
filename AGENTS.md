@@ -57,7 +57,7 @@ To test locally, ensure you have staged/unstaged changes in a git repo, then run
 ## Notable
 
 - No linter, formatter, or typechecker config in the repo
-- `build/`, `output/`, and `var/` are gitignored
+- `build/`, and `output/` are gitignored
 - Exit code 1 also means "unknown command"
 - `validate-policy` returns 1 when violations found
 
