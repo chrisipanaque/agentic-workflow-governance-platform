@@ -6,6 +6,24 @@ All 7 commands run as standalone CLI tools in any git repository — same binary
 
 ---
 
+## Quick Start
+
+Run this inside your repo to set up the governance tool as a git submodule, build it, and create a CI workflow:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/chrisipanaque/agentic-workflow-governance-tools/main/setup.sh | bash
+```
+
+After setup, test it locally:
+
+```sh
+./_gov/build/agentic-workflow-governance-tools validate-policy
+```
+
+Build instructions, command details, and development notes are in `AGENTS.md`.
+
+---
+
 ## Agent System Architecture
 
 The agent workflow governance tools implement a **synchronous multi-stage pipeline** that transforms a raw git diff into a governance decision. Every stage produces a deterministic output consumed by the next:
@@ -202,24 +220,6 @@ All policies are JSON files. Agents can modify any config file to adjust enforce
 ### Single-Binary Deployment
 
 The compiled binary (`agentic-workflow-governance-tools`) and its config files are the only deployable units. Zero runtime dependencies. This means any agent environment — local dev machine, CI runner, container — can enforce the same policies by receiving the same binary and configs.
-
----
-
-## Quick Start
-
-Run this inside your repo to set up the governance tool as a git submodule, build it, and create a CI workflow:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/chrisipanaque/agentic-workflow-governance-tools/main/setup.sh | bash
-```
-
-After setup, test it locally:
-
-```sh
-./_gov/build/agentic-workflow-governance-tools validate-policy
-```
-
-Build instructions, command details, and development notes are in `AGENTS.md`.
 
 ---
 
