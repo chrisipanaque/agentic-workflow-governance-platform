@@ -18,13 +18,10 @@ add_executable(agentic-workflow-governance-tools
     src/config_loader.cpp
     src/diff_scanner.cpp
     src/path_validator.cpp
-    src/risk_engine.cpp
     src/trace_logger.cpp
     src/audit_log.cpp
     src/github_metadata.cpp
-    src/approval_gate.cpp
     src/dependency_validator.cpp
-    src/ownership_validator.cpp
 )
 
 target_include_directories(agentic-workflow-governance-tools PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

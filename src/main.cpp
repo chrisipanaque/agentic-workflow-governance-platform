@@ -1,17 +1,12 @@
 #include <iostream>
-#include <fstream>
-#include <chrono>
 #include <string_view>
 #include "config_loader.hpp"
 #include "diff_scanner.hpp"
 #include "path_validator.hpp"
-#include "risk_engine.hpp"
 #include "trace_logger.hpp"
 #include "audit_log.hpp"
 #include "github_metadata.hpp"
-#include "approval_gate.hpp"
 #include "dependency_validator.hpp"
-#include "ownership_validator.hpp"
 
 int main(int argc, char* argv[]) {
     std::cerr << "TRACE: main entered" << std::endl;
@@ -28,8 +23,6 @@ int main(int argc, char* argv[]) {
     std::cerr << "TRACE: TraceLogger constructed" << std::endl;
     AuditLog audit_log;
     std::cerr << "TRACE: AuditLog constructed" << std::endl;
-    auto pr_meta = github_metadata.get_pr_metadata();
-    std::cerr << "TRACE: PR metadata obtained" << std::endl;
 
     if (command == "healthcheck") {
         try {
@@ -177,141 +170,20 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (command == "risk-score") {
+    if (command == "validate-dependencies") {
         try {
-            std::cerr << "TRACE: risk-score start" << std::endl;
-            DiffScanner diff_scanner;
-            auto diff_stats = diff_scanner.scan();
-            std::cerr << "TRACE: risk-score diff scanned" << std::endl;
-
-            RiskEngine engine("config/risk-rules.json");
-            engine.load_rules();
-            auto risk = engine.calculate_score(diff_stats);
-            engine.print_score(risk);
-            std::cerr << "TRACE: risk-score calculated" << std::endl;
-            
-            json details;
-            details["score"] = risk.score;
-            details["severity"] = risk.severity == RiskEngine::Severity::CRITICAL ? "CRITICAL" :
-                                   risk.severity == RiskEngine::Severity::HIGH ? "HIGH" :
-                                   risk.severity == RiskEngine::Severity::MEDIUM ? "MEDIUM" : "LOW";
-            details["recommendation"] = risk.recommendation;
-            details["risk_factors"] = risk.risk_factors;
-                        auto meta_json = github_metadata.to_json();
-                        for (const auto& meta : meta_json.items()) {
-                            details[meta.key()] = meta.value();
-                        }
-            trace_logger.log_trace("risk_score", details);
-            
-            AuditLog::Status status = (risk.score >= 75.0) ? AuditLog::Status::FAILURE : AuditLog::Status::SUCCESS;
-            audit_log.record_entry(AuditLog::Action::RISK_SCORE, status,
-                                  "Risk score: " + std::to_string(static_cast<int>(risk.score)), details);
-            audit_log.write_report();
-            trace_logger.flush();
-
-            std::cerr << "TRACE: risk-score returning " << ((risk.score >= 75.0) ? 1 : 0) << std::endl;
-            return (risk.score >= 75.0) ? 1 : 0;
-        } catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << '\n';
-            audit_log.record_entry(AuditLog::Action::RISK_SCORE, AuditLog::Status::FAILURE,
-                                  std::string(e.what()));
-            audit_log.write_report();
-            std::cerr << "TRACE: risk-score returning 1 (exception)" << std::endl;
-            return 1;
-        }
-    }
-
-    if (command == "check-approval") {
-        try {
-            std::cerr << "TRACE: check-approval start" << std::endl;
-            DiffScanner diff_scanner;
-            auto diff_stats = diff_scanner.scan();
-            std::cerr << "TRACE: check-approval diff scanned" << std::endl;
-
-            RiskEngine engine("config/risk-rules.json");
-            engine.load_rules();
-            auto risk = engine.calculate_score(diff_stats);
-            std::cerr << "TRACE: check-approval risk calculated, score=" << risk.score << std::endl;
-
-            ApprovalGate gate("config/approval-config.json");
-            gate.load_config();
-            std::cerr << "TRACE: check-approval config loaded" << std::endl;
-
-            auto decision = gate.evaluate(risk, diff_stats);
-            gate.print_decision(decision);
-            std::cerr << "TRACE: check-approval evaluated" << std::endl;
-
-            auto md_report = gate.generate_markdown_report(decision, pr_meta, risk);
-            std::cerr << "TRACE: check-approval markdown generated" << std::endl;
-
-            std::filesystem::create_directories("output/reports");
-            auto now = std::chrono::system_clock::now();
-            auto time_t_now = std::chrono::system_clock::to_time_t(now);
-            char filename[64];
-            std::strftime(filename, sizeof(filename), "approval_%Y%m%d_%H%M%S.md",
-                          std::localtime(&time_t_now));
-            std::string filepath = std::string("output/reports/") + filename;
-            std::ofstream md_file(filepath);
-            if (md_file.is_open()) {
-                md_file << md_report;
-                md_file.close();
-                std::cerr << "TRACE: check-approval report written to " << filepath << std::endl;
-            }
-
-            json details;
-            details["score"] = risk.score;
-            details["approval_status"] = decision.status == ApprovalGate::Status::AUTO_APPROVED ? "AUTO_APPROVED" :
-                                          decision.status == ApprovalGate::Status::REQUIRES_REVIEW ? "REQUIRES_REVIEW" : "BLOCKED";
-            details["changed_files"] = diff_stats.files.size();
-            auto meta_json = github_metadata.to_json();
-            for (const auto& meta : meta_json.items()) {
-                details[meta.key()] = meta.value();
-            }
-            trace_logger.log_trace("check_approval", details);
-
-            AuditLog::Status log_status = (decision.status == ApprovalGate::Status::AUTO_APPROVED)
-                                          ? AuditLog::Status::SUCCESS : AuditLog::Status::FAILURE;
-            audit_log.record_entry(AuditLog::Action::CHECK_APPROVAL, log_status,
-                                  decision.recommendation, details);
-            audit_log.write_report();
-            trace_logger.flush();
-
-            std::cerr << "TRACE: check-approval returning " << ((decision.status == ApprovalGate::Status::AUTO_APPROVED) ? 0 : 1) << std::endl;
-            return (decision.status == ApprovalGate::Status::AUTO_APPROVED) ? 0 : 1;
-        } catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << '\n';
-            audit_log.record_entry(AuditLog::Action::CHECK_APPROVAL, AuditLog::Status::FAILURE,
-                                  std::string(e.what()));
-            audit_log.write_report();
-            std::cerr << "TRACE: check-approval returning 1 (exception)" << std::endl;
-            return 1;
-        }
-    }
-
-    if (command == "validate-architecture") {
-        try {
-            std::cerr << "TRACE: validate-architecture start" << std::endl;
+            std::cerr << "TRACE: validate-dependencies start" << std::endl;
 
             DiffScanner diff_scanner;
             auto diff_stats = diff_scanner.scan();
-            std::cerr << "TRACE: validate-architecture diff scanned" << std::endl;
+            std::cerr << "TRACE: validate-dependencies diff scanned" << std::endl;
 
             DependencyValidator dep_validator("config/dependency-rules.json");
             dep_validator.load_rules();
-            std::cerr << "TRACE: validate-architecture dependency rules loaded" << std::endl;
-
-            OwnershipValidator own_validator("config/ownership-rules.json");
-            own_validator.load_rules();
-            std::cerr << "TRACE: validate-architecture ownership rules loaded" << std::endl;
+            std::cerr << "TRACE: validate-dependencies dependency rules loaded" << std::endl;
 
             auto dep_violations = dep_validator.validate(diff_stats);
             dep_validator.print_violations(dep_violations);
-
-            auto ownership_info = own_validator.get_file_ownership(diff_stats);
-            own_validator.print_ownership(ownership_info);
-
-            auto touched_boundaries = own_validator.detect_cross_boundary(diff_stats);
-            own_validator.print_cross_boundary(touched_boundaries);
 
             json details;
             details["dependency_violations"] = json::array();
@@ -323,32 +195,31 @@ int main(int argc, char* argv[]) {
                 v_json["reason"] = v.reason;
                 details["dependency_violations"].push_back(v_json);
             }
-            details["touched_boundaries"] = json(touched_boundaries);
 
             auto meta_json = github_metadata.to_json();
             for (const auto& meta : meta_json.items()) {
                 details[meta.key()] = meta.value();
             }
-            trace_logger.log_trace("validate_architecture", details);
+            trace_logger.log_trace("validate_dependencies", details);
 
             bool has_violations = !dep_violations.empty();
             AuditLog::Status log_status = has_violations
                                           ? AuditLog::Status::FAILURE
                                           : AuditLog::Status::SUCCESS;
-            audit_log.record_entry(AuditLog::Action::VALIDATE_ARCHITECTURE, log_status,
-                                  has_violations ? "Dependency violations found" : "Architecture validation passed",
+            audit_log.record_entry(AuditLog::Action::VALIDATE_DEPENDENCIES, log_status,
+                                  has_violations ? "Dependency violations found" : "Dependency validation passed",
                                   details);
             audit_log.write_report();
             trace_logger.flush();
 
-            std::cerr << "TRACE: validate-architecture returning " << (has_violations ? 1 : 0) << std::endl;
+            std::cerr << "TRACE: validate-dependencies returning " << (has_violations ? 1 : 0) << std::endl;
             return has_violations ? 1 : 0;
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << '\n';
-            audit_log.record_entry(AuditLog::Action::VALIDATE_ARCHITECTURE, AuditLog::Status::FAILURE,
+            audit_log.record_entry(AuditLog::Action::VALIDATE_DEPENDENCIES, AuditLog::Status::FAILURE,
                                   std::string(e.what()));
             audit_log.write_report();
-            std::cerr << "TRACE: validate-architecture returning 1 (exception)" << std::endl;
+            std::cerr << "TRACE: validate-dependencies returning 1 (exception)" << std::endl;
             return 1;
         }
     }

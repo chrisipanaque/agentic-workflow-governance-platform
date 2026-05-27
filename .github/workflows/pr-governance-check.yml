@@ -44,20 +44,11 @@ jobs:
           ../build/agentic-workflow-governance-tools scan-diff
           cd ..
 
-      - name: Test validate-policy (pass case)
+      - name: Test validate-policy
         run: ./build/agentic-workflow-governance-tools validate-policy
 
-      - name: Test validate-policy (fail case - should detect violations)
-        run: ./build/agentic-workflow-governance-tools validate-policy
-
-      - name: Test risk-score
-        run: ./build/agentic-workflow-governance-tools risk-score
-
-      - name: Test check-approval
-        run: timeout 30 ./build/agentic-workflow-governance-tools check-approval
-
-      - name: Test validate-architecture
-        run: timeout 30 ./build/agentic-workflow-governance-tools validate-architecture
+      - name: Test validate-dependencies
+        run: timeout 30 ./build/agentic-workflow-governance-tools validate-dependencies
 
       - name: Upload logs and reports
         if: always()

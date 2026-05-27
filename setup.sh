@@ -40,7 +40,7 @@ cmake --build "$SUBMODULE_DIR/build"
 if [ ! -d "config" ]; then
     echo "Copying default config files to your repo's config/..."
     cp -r "$SUBMODULE_DIR/config" .
-    echo "Edit these files to set your own policies: config/forbidden-paths.json config/risk-rules.json"
+    echo "Edit these files to set your own policies: config/forbidden-paths.json config/dependency-rules.json"
 fi
 
 echo "Adding $SUBMODULE_DIR/build/ to .gitignore..."

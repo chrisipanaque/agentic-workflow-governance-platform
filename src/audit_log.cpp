@@ -33,9 +33,7 @@ std::string AuditLog::action_to_string(Action action) const {
         case Action::SHOW_POLICIES: return "SHOW_POLICIES";
         case Action::SCAN_DIFF: return "SCAN_DIFF";
         case Action::VALIDATE_POLICY: return "VALIDATE_POLICY";
-        case Action::RISK_SCORE: return "RISK_SCORE";
-        case Action::CHECK_APPROVAL: return "CHECK_APPROVAL";
-        case Action::VALIDATE_ARCHITECTURE: return "VALIDATE_ARCHITECTURE";
+        case Action::VALIDATE_DEPENDENCIES: return "VALIDATE_DEPENDENCIES";
     }
     return "UNKNOWN";
 }
