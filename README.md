@@ -2,6 +2,8 @@
 
 Deterministic C++20 CLI that intercepts AI agent code changes at the repository boundary, validates them against configurable policies, and returns structured decisions via exit codes — all with full traceability.
 
+All 7 commands run as standalone CLI tools in any git repository — same binary, same exit codes whether you run them locally in your terminal or as a CI gate.
+
 ---
 
 ## Agent System Architecture
@@ -168,7 +170,7 @@ Five JSON config files and one CODEOWNERS file govern all system behavior. No re
 | `config/forbidden-paths.json` | Security (hard block) | 3 path patterns | `PathValidator` | What files agents may not touch |
 | `config/risk-rules.json` | Risk quantification | 9 weighted patterns | `RiskEngine` | How risky a change is considered |
 | `config/approval-config.json` | Decision thresholds | 3 thresholds | `ApprovalGate` | When auto-approval / review / block triggers |
-| `.github/CODEOWNERS` | Review routing | 3 ownership patterns | `ApprovalGate` | Who must review non-auto-approved PRs |
+| `.github/CODEOWNERS` | Review routing | 6 ownership patterns | `ApprovalGate` | Who must review non-auto-approved PRs |
 | `config/dependency-rules.json` | Architectural isolation | 3 boundaries | `DependencyValidator` | Which cross-module includes are forbidden |
 | `config/ownership-rules.json` | Team boundaries | 4 boundary definitions | `OwnershipValidator` | Which teams own which directories |
 
@@ -203,14 +205,30 @@ The compiled binary (`agentic-workflow-governance-tools`) and its config files a
 
 ---
 
-## Quick Reference
+## Quick Start
 
+Run this inside your repo to set up the governance tool as a git submodule, build it, and create a CI workflow:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/chrisipanaque/agentic-workflow-governance-tools/main/setup.sh | bash
 ```
-CLI:  ./agentic-workflow-governance-tools <command>
-C++:  C++20, CMake 3.20+
-Dep:  nlohmann/json v3.11.2 (FetchContent, no package manager)
-LOC:  1,852 lines across 11 source + 10 header files
-CI:   GitHub Actions — 12-step workflow with timeout safety on every command
+
+After setup, test it locally:
+
+```sh
+./_gov/build/agentic-workflow-governance-tools validate-policy
 ```
 
 Build instructions, command details, and development notes are in `AGENTS.md`.
+
+---
+
+## Quick Reference
+
+```
+CLI:  ./build/agentic-workflow-governance-tools <command>
+C++:  C++20, CMake 3.20+
+Dep:  nlohmann/json v3.11.2 (FetchContent, no package manager)
+LOC:  1,852 lines across 11 source + 10 header files
+CI:   GitHub Actions — 13-step workflow; high-risk commands wrapped in timeout 30
+```
