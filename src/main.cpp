@@ -235,7 +235,6 @@ int main(int argc, char* argv[]) {
 
             ApprovalGate gate("config/approval-config.json");
             gate.load_config();
-            gate.load_codeowners(".github/CODEOWNERS");
             std::cerr << "TRACE: check-approval config loaded" << std::endl;
 
             auto decision = gate.evaluate(risk, diff_stats);
@@ -263,7 +262,6 @@ int main(int argc, char* argv[]) {
             details["score"] = risk.score;
             details["approval_status"] = decision.status == ApprovalGate::Status::AUTO_APPROVED ? "AUTO_APPROVED" :
                                           decision.status == ApprovalGate::Status::REQUIRES_REVIEW ? "REQUIRES_REVIEW" : "BLOCKED";
-            details["required_approvers"] = decision.required_approvers;
             details["changed_files"] = diff_stats.files.size();
             auto meta_json = github_metadata.to_json();
             for (const auto& meta : meta_json.items()) {

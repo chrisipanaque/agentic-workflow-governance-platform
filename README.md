@@ -35,8 +35,7 @@ The agent workflow governance tools implement a **synchronous multi-stage pipeli
                      │  risk-rules.json      │
                      │  approval-config.json │
                      │  dependency-rules.json│
-                     │  ownership-rules.json │
-                     │  CODEOWNERS           │
+                      │  ownership-rules.json │
                      └──────┬───────┬───────┘
                             │       │
     PIPELINE                │       │
@@ -85,7 +84,7 @@ The agent workflow governance tools implement a **synchronous multi-stage pipeli
 | `ConfigLoader` | Ingests policy configs | `forbidden-paths.json` | `ForbiddenPath[]` |
 | `PathValidator` | Hard-blocks forbidden file paths | `ForbiddenPath[]` + `DiffStats` | `ValidationResult` (pass/fail) |
 | `RiskEngine` | Quantifies change risk on a 0–100 scale | `risk-rules.json` + `DiffStats` | `RiskScore { score, severity, factors }` |
-| `ApprovalGate` | Determines approval tier + required reviewers | `approval-config.json` + `CODEOWNERS` + `RiskScore` | `ApprovalDecision` + markdown report |
+| `ApprovalGate` | Determines approval tier against configurable thresholds | `approval-config.json` + `RiskScore` | `ApprovalDecision` + markdown report |
 | `DependencyValidator` | Enforces module boundary isolation by scanning `#include` directives | `dependency-rules.json` + `DiffStats` | `Violation[]` |
 | `OwnershipValidator` | Maps changed files to team ownership boundaries | `ownership-rules.json` + `DiffStats` | `OwnershipInfo[]`, cross-boundary report |
 | `GitHubMetadata` | Enriches all outputs with CI context | `GITHUB_*` env vars | `PRMetadata` + JSON |
@@ -149,7 +148,7 @@ The risk score is mapped to a three-tier approval decision against configurable 
   score < 25  ──→  AUTO_APPROVED   ──→ "Standard review sufficient."
 ```
 
-For non-auto-approved PRs, the system consults CODEOWNERS to identify required approvers based on which files changed. A human-readable markdown report is generated with per-file ownership, risk breakdown, and required reviewer list.
+A human-readable markdown report is generated with risk breakdown and decision summary.
 
 **Policy config**: `config/approval-config.json` (thresholds: block=75, require_review=25, auto_approve=10).
 
@@ -181,14 +180,13 @@ All three are flushed synchronously before the process exits. Directory creation
 
 ## Policy Configuration Architecture
 
-Five JSON config files and one CODEOWNERS file govern all system behavior. No recompilation is needed to adjust any policy — the agent or operator edits JSON directly.
+Five JSON config files govern all system behavior. No recompilation is needed to adjust any policy — the agent or operator edits JSON directly.
 
 | Config File | Domain | Rules | Evaluated By | Changes Behavior |
 |---|---|---|---|---|
 | `config/forbidden-paths.json` | Security (hard block) | 3 path patterns | `PathValidator` | What files agents may not touch |
 | `config/risk-rules.json` | Risk quantification | 9 weighted patterns | `RiskEngine` | How risky a change is considered |
 | `config/approval-config.json` | Decision thresholds | 3 thresholds | `ApprovalGate` | When auto-approval / review / block triggers |
-| `.github/CODEOWNERS` | Review routing | 6 ownership patterns | `ApprovalGate` | Who must review non-auto-approved PRs |
 | `config/dependency-rules.json` | Architectural isolation | 3 boundaries | `DependencyValidator` | Which cross-module includes are forbidden |
 | `config/ownership-rules.json` | Team boundaries | 4 boundary definitions | `OwnershipValidator` | Which teams own which directories |
 

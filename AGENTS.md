@@ -35,7 +35,7 @@ Single dependency: `nlohmann_json` (v3.11.2, fetched via CMake FetchContent). No
 | `scan-diff` | Runs `git diff --unified=0` via popen, prints stats | always |
 | `validate-policy` | scan-diff + check paths against policy | if no violations |
 | `risk-score` | scan-diff + score against `config/risk-rules.json` | if score < 75 |
-| `check-approval` | risk-score + approval gating with CODEOWNERS | if auto-approved (score < require_review) |
+| `check-approval` | risk-score + approval gating against configurable thresholds | if auto-approved (score < require_review) |
 | `validate-architecture` | scan-diff + dependency boundary & ownership validation | if no dependency violations |
 
 All commands write JSON audit reports to `output/reports/audit_*.json` and JSONL traces to `output/traces/trace_*.jsonl`.
