@@ -6,7 +6,7 @@ All 5 commands run as standalone CLI tools in any git repository — same binary
 
 ## Requirements
 
-- **Git** — the tool runs `git diff` and installs as a git submodule
+- **Git** — the tool runs `git diff`
 - **CMake 3.20+** — C++20 build system
   - macOS: `brew install cmake`
   - Linux (Debian/Ubuntu): `sudo apt-get install cmake build-essential`
@@ -18,17 +18,17 @@ All 5 commands run as standalone CLI tools in any git repository — same binary
 
 ## Quick Start
 
-Run this inside your repo to set up the governance tool as a git submodule, build it, and create a CI workflow:
+Clone and build:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/chrisipanaque/agentic-workflow-governance-tools/main/setup.sh | bash
+git clone https://github.com/chrisipanaque/agentic-workflow-governance-tools.git
+cd agentic-workflow-governance-tools
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/agentic-workflow-governance-tools validate-policy
 ```
 
-After setup, test it locally:
-
-```sh
-./_gov/build/agentic-workflow-governance-tools validate-policy
-```
+> Edit `config/forbidden-paths.json` and `config/dependency-rules.json` to set your own policies. The binary reads them from disk at runtime — no recompilation needed.
 
 Build instructions, command details, and development notes are in `AGENTS.md`.
 

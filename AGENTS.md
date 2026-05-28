@@ -4,17 +4,17 @@ C++20 CLI tool that scans git diffs, validates paths against policies, and enfor
 
 ## Quick Start
 
-Run this inside your repo to set up the governance tool as a git submodule, build it, and create a CI workflow:
+Clone and build:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/chrisipanaque/agentic-workflow-governance-tools/main/setup.sh | bash
+git clone https://github.com/chrisipanaque/agentic-workflow-governance-tools.git
+cd agentic-workflow-governance-tools
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/agentic-workflow-governance-tools validate-policy
 ```
 
-After setup, test it locally:
-
-```sh
-./_gov/build/agentic-workflow-governance-tools validate-policy
-```
+> Edit `config/forbidden-paths.json` and `config/dependency-rules.json` to set your own policies. The binary reads them from disk at runtime — no recompilation needed.
 
 ## Build & Run
 
